@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">NativePasskeys</string>
+    <string name="auth0_domain">native-passkeys-test.eu.auth0.com</string>
+    <string name="auth0_scheme">demo</string>
+    <string name="auth0_client_id">glUZtSOquPCab5QW0tZWUQ182RubWqzy</string>
+    <string name="main_welcome">Welcome to Native Login with passkeys!</string>
+    <string name="email_hint">Email Address</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="logout">Logout</string>
+
 </resources>

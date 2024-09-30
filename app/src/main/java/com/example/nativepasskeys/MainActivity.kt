@@ -11,12 +11,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.auth0.android.Auth0
 import com.example.nativepasskeys.ui.theme.NativePasskeysTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var auth0: Auth0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        auth0 = Auth0(
+            getString(R.string.auth0_client_id),
+            getString(R.string.auth0_domain)
+        )
+
         setContent {
             NativePasskeysTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
