@@ -27,7 +27,6 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:layout_marginTop="20dp"
-
         android:hint="@string/email_hint"
         android:inputType="textEmailAddress" />
 
@@ -35,8 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/main_buttons_container"
-        android:layout_marginTop="20dp
-"
+        android:layout_marginTop="20dp"
         android:orientation="vertical">
     <Button
         android:id="@+id/main_login_btn"

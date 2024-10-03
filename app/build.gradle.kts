@@ -50,6 +50,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    sourceSets {
+        getByName("main") {
+            java {
+                srcDirs("src/main/java", "src/main/java/com.example.nativepasskeys")
+            }
+        }
+    }
 }
 
 dependencies {
@@ -71,4 +78,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.auth0)
+    implementation(libs.retrofit)
 }
