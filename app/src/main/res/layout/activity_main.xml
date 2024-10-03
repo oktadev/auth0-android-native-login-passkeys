@@ -11,7 +11,7 @@
         android:id="@+id/main_header_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_site_settings" />
+        android:src="@drawable/ic_passkey" />
 
     <TextView
         android:id="@+id/main_welcome_textview"
@@ -64,13 +64,14 @@
         android:text="@string/sign_up" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/main_logout_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/purple_500"
         android:textColor="@color/white"
         android:layout_marginTop="50dp"
         android:enabled="false"
+        android:visibility="invisible"
         android:text="@string/logout" />
     </LinearLayout>
 </LinearLayout>
