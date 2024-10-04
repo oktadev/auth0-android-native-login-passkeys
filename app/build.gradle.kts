@@ -78,5 +78,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.auth0)
-    implementation(libs.retrofit)
+    // retrofit
+    implementation(libs.retrofit.v290)
+    // gson converter
+    implementation(libs.converter.gson)
 }

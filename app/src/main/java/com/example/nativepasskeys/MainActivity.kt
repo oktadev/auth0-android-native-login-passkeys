@@ -1,5 +1,7 @@
 package com.example.nativepasskeys
 
+import ApiClient
+import RetrofitClient
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -8,6 +10,9 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.activity.ComponentActivity
 import com.auth0.android.Auth0
+import okhttp3.Callback
+import retrofit2.Call
+import retrofit2.Response
 
 
 class MainActivity : ComponentActivity() {
@@ -49,18 +54,30 @@ class MainActivity : ComponentActivity() {
 
     private fun signUpWithNativePasskey(email: String){
         Log.d(TAG, "calling signUpWithNativePasskey!")
-
-
+        getPasskeyChallenge(email)
     }
 
     private fun getPasskeyChallenge(email: String){
-        val url = "https://${R.string.auth0_domain}/passkey/register";
-        val payload = mapOf(
+        val body = mapOf(
             "client_id" to auth0.clientId,
             "user_profile" to mapOf(
                 "email" to email
             )
         )
+        ApiClient.apiService.signUpWithPasskey(body).enqueue(object: retrofit2.Callback<SignUpResponse>{
+            override fun onResponse(call: Call<SignUpResponse>, response: Response<SignUpResponse>) {
+                // handle the response
+                Log.d(TAG, "all goooooood ")
+                Log.d(TAG, "errorBody: " + response.errorBody()?.string())
+                Log.d(TAG, response.toString())
+            }
+
+            override fun onFailure(call: Call<SignUpResponse>, t: Throwable) {
+                // handle the failure
+                Log.d(TAG, "error!!")
+                Log.d(TAG, t.message.toString())
+            }
+        })
 
 
     }
