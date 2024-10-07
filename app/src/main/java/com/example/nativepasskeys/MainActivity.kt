@@ -1,7 +1,6 @@
 package com.example.nativepasskeys
 
 import ApiClient
-import RetrofitClient
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -10,10 +9,23 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
+import androidx.credentials.CreatePublicKeyCredentialRequest
+import androidx.credentials.CreatePublicKeyCredentialResponse
+import androidx.credentials.CredentialManager
+import androidx.credentials.exceptions.CreateCredentialException
+import androidx.credentials.exceptions.CreateCredentialNoCreateOptionException
 import com.auth0.android.Auth0
-import okhttp3.Callback
+import com.auth0.android.result.Credentials
+import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
+import java.time.Instant
+import java.util.Date
 
 
 class MainActivity : ComponentActivity() {
@@ -76,7 +88,9 @@ class MainActivity : ComponentActivity() {
                 progressBar.visibility = View.GONE
                 Log.d(TAG, "all goooooood ")
                 Log.d(TAG, "errorBody: " + response.errorBody()?.string())
-                Log.d(TAG, response.toString())
+                Log.d(TAG, response.body().toString())
+                val body = response.body()!!
+                createCredential(body.authnParamsPublicKey, body.authSession)
             }
 
             override fun onFailure(call: Call<SignUpResponse>, t: Throwable) {
@@ -84,14 +98,60 @@ class MainActivity : ComponentActivity() {
                 progressBar.visibility = View.GONE
                 Log.d(TAG, "error!!")
                 Log.d(TAG, t.message.toString())
+
+                TODO("error handling")
             }
         })
 
 
     }
 
-    private fun createCredential(){
-        TODO("Call CredentialManager")
+    private fun  createCredential(authnParamsPublicKey: AuthnParamsPublicKey,
+                                 authSession: String){
+        Log.d(TAG, "CreateCredential with params $authnParamsPublicKey")
+
+        val passkeyOption = CreatePublicKeyCredentialRequest(Gson().toJson(authnParamsPublicKey))
+
+        val credentialManager = CredentialManager.create(this@MainActivity.baseContext);
+        val coroutineScope = MainScope()
+
+        // runs concurrently
+        coroutineScope.launch {
+            try {
+                Log.d(TAG, "inside coroutine")
+                Log.d(TAG, passkeyOption.toString())
+                val creds = credentialManager.createCredential(
+                    context = this@MainActivity.baseContext,
+                    request = passkeyOption
+                ) as CreatePublicKeyCredentialResponse
+                Log.wtf(TAG, "IM SCREAMING")
+                Log.d(TAG, creds.registrationResponseJson)
+                val jsonObject = JSONObject(creds.registrationResponseJson)
+//                val dict = jsonObject.toMap()
+//                val oauthTokenResponse = callOAuthToken(dict, authSession)
+//                val expiresAt = oauthTokenResponse.getInt("expires_in") + Instant.now().epochSecond;
+//
+//                val a0Creds = Credentials(
+//                    idToken = oauthTokenResponse.getString("id_token"),
+//                    accessToken = oauthTokenResponse.getString("access_token"),
+//                    refreshToken = if (oauthTokenResponse.has("refresh_token")) oauthTokenResponse.getString(
+//                        "refresh_token"
+//                    ) else null,
+//                    type = oauthTokenResponse.getString("token_type"),
+//                    expiresAt = Date(expiresAt * 1000),
+//                    scope = if (oauthTokenResponse.has("refresh_token")) oauthTokenResponse.getString(
+//                        "refresh_token"
+//                    ) else null,
+//                )
+//
+//                handleAuth0Credential(a0Creds);
+//                Log.d("Success", oauthTokenResponse.toString())
+            } catch (e: CreateCredentialException) {
+                Log.e("Failure", e.toString());
+            } catch (e: CreateCredentialNoCreateOptionException){
+                Log.e(TAG, "errorrrr: $e");
+            }
+        }
     }
 
     private fun callOauthTokenToCreateAccount(){

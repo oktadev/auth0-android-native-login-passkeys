@@ -26,6 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
+        android:isCredential="true"
         android:layout_marginTop="20dp"
         android:hint="@string/email_hint"
         android:inputType="textEmailAddress" />

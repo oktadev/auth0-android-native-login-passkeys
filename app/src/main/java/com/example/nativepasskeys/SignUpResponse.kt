@@ -31,6 +31,7 @@ import com.google.gson.annotations.SerializedName
  *
  * */
 class SignUpResponse {
-    @SerializedName("authn_params_public_key") var authnParamsPublicKey : AuthnParamsPublicKey? = AuthnParamsPublicKey()
-    @SerializedName("auth_session") var authSession : String? = null
+    @SerializedName("authn_params_public_key") var authnParamsPublicKey : AuthnParamsPublicKey = AuthnParamsPublicKey()
+    @SerializedName("auth_session")
+    lateinit var authSession : String
 }
