@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
 import com.auth0.android.Auth0
 import okhttp3.Callback
@@ -64,9 +65,15 @@ class MainActivity : ComponentActivity() {
                 "email" to email
             )
         )
+
+        // Set up progress before call
+        val progressBar = findViewById<ProgressBar>(R.id.main_progress_bar)
+        progressBar.visibility = View.VISIBLE
+
         ApiClient.apiService.signUpWithPasskey(body).enqueue(object: retrofit2.Callback<SignUpResponse>{
             override fun onResponse(call: Call<SignUpResponse>, response: Response<SignUpResponse>) {
                 // handle the response
+                progressBar.visibility = View.GONE
                 Log.d(TAG, "all goooooood ")
                 Log.d(TAG, "errorBody: " + response.errorBody()?.string())
                 Log.d(TAG, response.toString())
@@ -74,6 +81,7 @@ class MainActivity : ComponentActivity() {
 
             override fun onFailure(call: Call<SignUpResponse>, t: Throwable) {
                 // handle the failure
+                progressBar.visibility = View.GONE
                 Log.d(TAG, "error!!")
                 Log.d(TAG, t.message.toString())
             }

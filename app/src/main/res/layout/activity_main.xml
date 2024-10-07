@@ -72,4 +72,11 @@
         android:visibility="invisible"
         android:text="@string/logout" />
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/main_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/purple_200"
+        android:visibility="gone" />
 </LinearLayout>

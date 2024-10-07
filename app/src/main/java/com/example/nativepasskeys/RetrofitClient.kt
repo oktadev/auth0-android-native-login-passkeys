@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    public val BASE_URL = "https://native-passkeys-test.eu.auth0.com/"
+    public val BASE_URL = "https://login.carlastabile.tech/"
 
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()
