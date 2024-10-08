@@ -1,6 +1,7 @@
 package com.example.nativepasskeys
 
 import ApiClient
+import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -51,7 +52,6 @@ class MainActivity : ComponentActivity() {
     private fun initWidgets(){
         val signUpBtn = findViewById<View>(R.id.main_signup_btn) as Button
         val loginBtn = findViewById<View>(R.id.main_login_btn) as Button
-        val logoutBtn = findViewById<View>(R.id.main_logout_btn) as Button
         val email = findViewById<EditText>(R.id.main_email_edittext)
 
         signUpBtn.setOnClickListener {
@@ -185,6 +185,7 @@ class MainActivity : ComponentActivity() {
                 )
                 handleAuth0Credential(auth0Credentials);
                 Log.d("Success", body.toString())
+                navigateToHomeActivity()
             }
 
             override fun onFailure(call: Call<OAuthTokenResponse>, t: Throwable) {
@@ -203,5 +204,9 @@ class MainActivity : ComponentActivity() {
 //        showSnackBar("Success: ${credentials.accessToken}")
 //        updateUI()
 //        showUserProfile()
+    }
+
+    fun navigateToHomeActivity(){
+        startActivity(Intent(this, HomeActivity::class.java))
     }
 }
