@@ -30,7 +30,7 @@ import com.google.gson.annotations.SerializedName
  * }
  *
  * */
-class SignUpResponse {
+class ChallengeResponse {
     @SerializedName("authn_params_public_key") var authnParamsPublicKey : AuthnParamsPublicKey = AuthnParamsPublicKey()
     @SerializedName("auth_session")
     lateinit var authSession : String

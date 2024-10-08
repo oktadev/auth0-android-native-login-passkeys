@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +20,7 @@ class HomeActivity : AppCompatActivity() {
         val logoutBtn = findViewById<Button>(R.id.home_logout_btn)
         logoutBtn.setOnClickListener {
             finish()
-            TODO("implement clearing auth0 data")
+//            TODO("implement clearing auth0 data")
         }
 
     }
