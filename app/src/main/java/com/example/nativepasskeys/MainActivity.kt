@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
@@ -31,6 +32,7 @@ import java.util.Date
 class MainActivity : ComponentActivity() {
 
     private lateinit var auth0: Auth0
+    private lateinit var cachedCredentials: Credentials
     private val TAG: String = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,11 +88,13 @@ class MainActivity : ComponentActivity() {
             override fun onResponse(call: Call<SignUpResponse>, response: Response<SignUpResponse>) {
                 // handle the response
                 progressBar.visibility = View.GONE
-                Log.d(TAG, "all goooooood ")
-                Log.d(TAG, "errorBody: " + response.errorBody()?.string())
-                Log.d(TAG, response.body().toString())
-                val body = response.body()!!
-                createCredential(body.authnParamsPublicKey, body.authSession)
+                if (response.code() >= 400) {
+                    Log.d(TAG, "errorBody: " + response.errorBody()?.string())
+                } else {
+                    Log.d(TAG, response.body().toString())
+                    val body = response.body()!!
+                    createCredential(body.authnParamsPublicKey, body.authSession)
+                }
             }
 
             override fun onFailure(call: Call<SignUpResponse>, t: Throwable) {
@@ -126,9 +130,7 @@ class MainActivity : ComponentActivity() {
                 ) as CreatePublicKeyCredentialResponse
                 Log.wtf(TAG, "IM SCREAMING")
                 Log.d(TAG, creds.registrationResponseJson)
-                val jsonObject = JSONObject(creds.registrationResponseJson)
-//                val dict = jsonObject.toMap()
-//                val oauthTokenResponse = callOAuthToken(dict, authSession)
+                val oauthTokenResponse = callOauthTokenToCreateAccount(authSession, creds.registrationResponseJson)
 //                val expiresAt = oauthTokenResponse.getInt("expires_in") + Instant.now().epochSecond;
 //
 //                val a0Creds = Credentials(
@@ -154,7 +156,52 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun callOauthTokenToCreateAccount(){
-        TODO("Call POST oauth/token and retrieve tokens")
+    private fun callOauthTokenToCreateAccount(authSession: String, authnResponse: String){
+        val body = mapOf<String, Any>(
+            "grant_type" to "urn:okta:params:oauth:grant-type:webauthn",
+            "scope" to "openid profile email",
+            "client_id" to auth0.clientId,
+            "auth_session" to authSession,
+            "authn_response" to Gson().fromJson<AuthnResponse>(authnResponse, AuthnResponse::class.java)
+        );
+        Log.d(TAG, body.toString())
+        ApiClient.apiService.oAuthToken(body).enqueue(object: retrofit2.Callback<OAuthTokenResponse>{
+            override fun onResponse(call: Call<OAuthTokenResponse>, response: Response<OAuthTokenResponse>) {
+                // handle the response
+                Log.d(TAG, "getting tokens")
+                Log.d(TAG, "errorBody: " + response.errorBody()?.string())
+                Log.d(TAG, response.body().toString())
+                val body = response.body()!!
+
+                val expiresAt = body.expiresIn + Instant.now().epochSecond;
+
+                val auth0Credentials = Credentials(
+                    idToken = body.idToken,
+                    accessToken = body.accessToken,
+                    refreshToken = body.refreshToken,
+                    type = body.tokenType,
+                    expiresAt = Date(expiresAt * 1000),
+                    scope= body.refreshToken,
+                )
+                handleAuth0Credential(auth0Credentials);
+                Log.d("Success", body.toString())
+            }
+
+            override fun onFailure(call: Call<OAuthTokenResponse>, t: Throwable) {
+                // handle the failure
+                Log.d(TAG, "error getting tokens!!")
+                Log.d(TAG, t.message.toString())
+
+                TODO("error handling")
+            }
+        })
+    }
+    private fun handleAuth0Credential(credentials: Credentials) {
+        cachedCredentials = credentials
+        Log.d("Auth0 Id Token:", credentials.idToken);
+
+//        showSnackBar("Success: ${credentials.accessToken}")
+//        updateUI()
+//        showUserProfile()
     }
 }

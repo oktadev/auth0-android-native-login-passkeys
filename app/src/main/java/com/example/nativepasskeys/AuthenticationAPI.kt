@@ -8,5 +8,9 @@ interface AuthenticationAPI {
     @POST("passkey/register")
     @JvmSuppressWildcards
     fun signUpWithPasskey(@Body signUpBody: Map<String, Any>): Call<SignUpResponse>
+
+    @POST("oauth/token")
+    @JvmSuppressWildcards
+    fun oAuthToken(@Body oAuthTokenBody: Map<String, Any>): Call<OAuthTokenResponse>
 }
 
