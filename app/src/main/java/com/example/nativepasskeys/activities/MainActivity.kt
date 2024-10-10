@@ -28,6 +28,7 @@ import com.example.nativepasskeys.api.data.AuthnParamsPublicKey
 import com.example.nativepasskeys.api.data.ChallengeResponse
 import com.example.nativepasskeys.api.data.OAuthTokenResponse
 import com.example.nativepasskeys.R
+import com.example.nativepasskeys.api.data.AuthnResponse
 import com.example.nativepasskeys.api.data.RegisterResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.MainScope
@@ -210,14 +211,16 @@ class MainActivity : ComponentActivity() {
   }
 
   private fun callOauthTokenToCreateAccount(authSession: String, authnResponse: String){
+
+    val parsedAuthnResponse = Gson().fromJson(authnResponse, AuthnResponse::class.java)
+    Log.d(TAG, "authnResponse: $authnResponse")
     val body = mapOf(
       "grant_type" to "urn:okta:params:oauth:grant-type:webauthn",
       "scope" to "openid profile email",
       "client_id" to auth0.clientId,
       "auth_session" to authSession,
-      "authn_response" to JSONObject(authnResponse).toMap()
+      "authn_response" to parsedAuthnResponse
     )
-    Log.d(TAG, body.toString())
 
     ApiClient.apiService.oAuthToken(body).enqueue(object: retrofit2.Callback<OAuthTokenResponse>{
       override fun onResponse(call: Call<OAuthTokenResponse>, response: Response<OAuthTokenResponse>) {
