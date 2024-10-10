@@ -1,11 +1,10 @@
-package com.example.nativepasskeys
+package com.example.nativepasskeys.activities
 
-import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import com.example.nativepasskeys.R
 
 class HomeActivity : ComponentActivity() {
 

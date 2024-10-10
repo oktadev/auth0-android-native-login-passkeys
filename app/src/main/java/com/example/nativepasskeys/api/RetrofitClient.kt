@@ -1,5 +1,5 @@
-import com.example.nativepasskeys.AuthenticationAPI
-import com.example.nativepasskeys.R
+package com.example.nativepasskeys.api
+
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

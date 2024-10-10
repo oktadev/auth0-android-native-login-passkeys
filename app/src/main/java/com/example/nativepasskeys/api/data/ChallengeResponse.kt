@@ -1,4 +1,4 @@
-package com.example.nativepasskeys
+package com.example.nativepasskeys.api.data
 
 import com.google.gson.annotations.SerializedName
 

@@ -1,5 +1,8 @@
-package com.example.nativepasskeys
+package com.example.nativepasskeys.api
 
+import com.example.nativepasskeys.api.data.ChallengeResponse
+import com.example.nativepasskeys.api.data.OAuthTokenResponse
+import com.example.nativepasskeys.api.data.RegisterResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -15,6 +18,6 @@ interface AuthenticationAPI {
 
     @POST("passkey/challenge")
     @JvmSuppressWildcards
-    fun startChallenge(@Body body: Map<String, Any>): Call<ChallengeResponse>
+    fun startChallenge(@Body body: Map<String, Any>): Call<RegisterResponse>
 }
 
