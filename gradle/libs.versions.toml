@@ -1,6 +1,8 @@
 [versions]
-agp = "8.6.0"
-auth0 = "2.9.2"
+agp = "8.7.1"
+auth0 = "3.2.0"
+auth0Auth0 = "3.2.0"
+auth0Version = "3.1.0"
 converterGson = "2.9.0"
 credentials = "1.5.0-alpha05"
 kotlin = "1.9.0"
@@ -24,6 +26,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 auth0 = { module = "com.auth0.android:auth0", version.ref = "auth0" }
+auth0-v320 = { module = "com.auth0.android:auth0", version.ref = "auth0Auth0" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
