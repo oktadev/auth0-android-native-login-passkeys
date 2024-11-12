@@ -44,28 +44,37 @@ class MainActivity : ComponentActivity() {
   private val TAG: String = "MainActivity"
   private val REALM: String = "Username-Password-Authentication"
 
-  private lateinit var auth0: Auth0
-  private lateinit var cachedCredentials: Credentials
-  private lateinit var credentialManager: CredentialManager
-  private lateinit var apiClient: AuthenticationAPIClient
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
-
-    // Instantiate the Auth0 Client
-    auth0 = Auth0.getInstance(getString(R.string.auth0_client_id), getString(R.string.auth0_domain))
-    apiClient = AuthenticationAPIClient(auth0)
-
-    credentialManager = CredentialManager.create(this@MainActivity.baseContext);
-
-    initWidgets()
+  private val auth0: Auth0 by lazy {
+    val account = Auth0.getInstance(
+      getString(R.string.auth0_client_id),
+      getString(R.string.auth0_domain)
+    )
+    account
   }
 
+  private val apiClient: AuthenticationAPIClient by lazy {
+    AuthenticationAPIClient(auth0)
+  }
   private val credentialsManager: CredentialsManager by lazy {
     val storage = SharedPreferencesStorage(this@MainActivity)
     val manager = CredentialsManager(apiClient, storage)
     manager
+  }
+
+  private val credentialManager: CredentialManager by lazy {
+    CredentialManager.create(this@MainActivity)
+  }
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    if (credentialsManager.hasValidCredentials()){
+      navigateToHomeActivity()
+    }
+
+    setContentView(R.layout.activity_main)
+
+    initWidgets()
   }
 
   private fun initWidgets(){
@@ -114,23 +123,7 @@ class MainActivity : ComponentActivity() {
                       credential.authenticationResponseJson,
                       PublicKeyCredentials::class.java
                     )
-                    apiClient.signinWithPasskey(
-                      passkeyChallengeResponse.authSession,
-                      authRequest,
-                      REALM
-                    )
-                      .validateClaims()
-                      .start(object :
-                        Callback<Credentials, AuthenticationException> {
-                        override fun onSuccess(result: Credentials) {
-                          credentialsManager.saveCredentials(result)
-                          Log.d(TAG, "SUCCESS: " + result.idToken)
-                        }
-
-                        override fun onFailure(error: AuthenticationException) {
-                          Log.d(TAG, "error on signin: " + error.getDescription())
-                        }
-                      })
+                    handleSignIn(passkeyChallengeResponse.authSession, authRequest)
                   }
 
                   else -> {
@@ -187,22 +180,8 @@ class MainActivity : ComponentActivity() {
               )
 
               Log.d(TAG, "Starting signin...")
-              apiClient.signinWithPasskey(
-                passKeyRegistrationChallenge.authSession,
-                authRequest,
-                REALM
-              )
-                .validateClaims()
-                .start(object : Callback<Credentials, AuthenticationException> {
-                  override fun onSuccess(result: Credentials) {
-                    credentialsManager.saveCredentials(result)
-                    Log.d(TAG, "SUCCESS" + result.idToken)
-                  }
-
-                  override fun onFailure(error: AuthenticationException) {
-                    Log.d(TAG, "Failure signing in " + error.getDescription())
-                  }
-                })
+              handleSignIn(passKeyRegistrationChallenge.authSession,
+                authRequest)
             }
           })
       }
@@ -214,95 +193,29 @@ class MainActivity : ComponentActivity() {
 
   }
 
-  private fun createCredential(authnParamsPublicKey: AuthnParamsPublicKey,
-                               authSession: String){
-    Log.d(TAG, "CreateCredential with params $authnParamsPublicKey")
-
-    val passkeyOption = CreatePublicKeyCredentialRequest(Gson().toJson(authnParamsPublicKey))
-
-    val coroutineScope = MainScope()
-
-    // runs concurrently
-    coroutineScope.launch {
-      try {
-        val credential = credentialManager.createCredential(
-          context = this@MainActivity.baseContext,
-          request = passkeyOption
-        ) as CreatePublicKeyCredentialResponse
-
-        callOauthTokenToCreateAccount(authSession, credential.registrationResponseJson)
-      } catch (e: CreateCredentialException) {
-        Log.e("Failure", e.toString());
-      } catch (e: CreateCredentialNoCreateOptionException){
-        Log.e(TAG, "errorrrr: $e");
-      }
-    }
-  }
-
-  fun JSONObject.toMap(): Map<String, Any> {
-    val map = mutableMapOf<String, Any>()
-    val keys = keys()
-    while (keys.hasNext()) {
-      val key = keys.next()
-      val value = get(key)
-      map[key] = when (value) {
-        is JSONObject -> value.toMap()
-        else -> value
-      }
-    }
-    return map
-  }
-
-  private fun callOauthTokenToCreateAccount(authSession: String, authnResponse: String){
-
-    val parsedAuthnResponse = Gson().fromJson(authnResponse, AuthnResponse::class.java)
-    Log.d(TAG, "authnResponse: $authnResponse")
-    val body = mapOf(
-      "grant_type" to "urn:okta:params:oauth:grant-type:webauthn",
-      "scope" to "openid profile email",
-      "client_id" to auth0.clientId,
-      "auth_session" to authSession,
-      "authn_response" to parsedAuthnResponse
+  private fun handleSignIn(authSession: String, authRequest: PublicKeyCredentials){
+    apiClient.signinWithPasskey(
+      authSession,
+      authRequest,
+      REALM
     )
+      .validateClaims()
+      .start(object :
+        Callback<Credentials, AuthenticationException> {
+        override fun onSuccess(result: Credentials) {
+          credentialsManager.saveCredentials(result)
+          Log.d(TAG, "SUCCESS: " + result.idToken)
+          navigateToHomeActivity()
+        }
 
-//    ApiClient.apiService.oAuthToken(body).enqueue(object: Callback<OAuthTokenResponse>{
-//      override fun onResponse(call: Call<OAuthTokenResponse>, response: Response<OAuthTokenResponse>) {
-//        Log.d(TAG, "getting tokens")
-//        Log.d(TAG, "errorBody: " + response.errorBody()?.string())
-//        Log.d(TAG, response.body().toString())
-//        val body = response.body()!!
-//
-//        val expiresAt = body.expiresIn + Instant.now().epochSecond;
-//
-//        val auth0Credentials = Credentials(
-//          idToken = body.idToken,
-//          accessToken = body.accessToken,
-//          refreshToken = body.refreshToken,
-//          type = body.tokenType,
-//          expiresAt = Date(expiresAt * 1000),
-//          scope= body.refreshToken,
-//        )
-//
-//        handleAuth0Credential(auth0Credentials);
-//        Log.d("Success", body.toString())
-//        navigateToHomeActivity()
-//      }
-//
-//      override fun onFailure(call: Call<OAuthTokenResponse>, t: Throwable) {
-//        Toast.makeText(applicationContext, t.message, Toast.LENGTH_LONG).show()
-//      }
-//    })
-  }
-
-  private fun handleAuth0Credential(credentials: Credentials) {
-    cachedCredentials = credentials
-    Log.d(TAG, "ID Token: " + credentials.idToken);
-//        showSnackBar("Success: ${credentials.accessToken}")
-//        updateUI()
-//        showUserProfile()
+        override fun onFailure(error: AuthenticationException) {
+          Log.d(TAG, "error on signin: " + error.getDescription())
+        }
+      })
   }
 
   fun navigateToHomeActivity(){
-    startActivity(Intent(this, HomeActivity::class.java))
+    val intent = Intent(this, HomeActivity::class.java)
+    startActivity(intent)
   }
 }
