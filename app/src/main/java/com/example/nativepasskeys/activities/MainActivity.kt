@@ -22,9 +22,7 @@ import androidx.credentials.exceptions.CreateCredentialNoCreateOptionException
 import androidx.credentials.exceptions.GetCredentialException
 import com.auth0.android.Auth0
 import com.auth0.android.result.Credentials
-import com.example.nativepasskeys.api.data.AuthnParamsPublicKey
 import com.example.nativepasskeys.R
-import com.example.nativepasskeys.api.data.AuthnResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
