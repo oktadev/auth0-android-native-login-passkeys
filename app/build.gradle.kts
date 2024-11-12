@@ -88,6 +88,7 @@ dependencies {
 
     // Auth0
     implementation(libs.auth0.v320)
+    implementation(libs.jwtdecode)
 
     // retrofit
     implementation(libs.retrofit.v290)

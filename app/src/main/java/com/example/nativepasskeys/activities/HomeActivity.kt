@@ -12,6 +12,7 @@ import com.auth0.android.authentication.storage.CredentialsManager
 import com.auth0.android.authentication.storage.CredentialsManagerException
 import com.auth0.android.authentication.storage.SharedPreferencesStorage
 import com.auth0.android.callback.Callback
+import com.auth0.android.jwt.JWT
 import com.auth0.android.provider.WebAuthProvider
 import com.auth0.android.result.Credentials
 import com.example.nativepasskeys.R
@@ -43,13 +44,13 @@ class HomeActivity : ComponentActivity() {
 
         Log.d(TAG, credentialsManager.hasValidCredentials().toString())
         val greeting = findViewById<TextView>(R.id.home_greeting_txt)
+        val idToken = findViewById<TextView>(R.id.home_token)
 
         credentialsManager.getCredentials(object: Callback<Credentials, CredentialsManagerException> {
             override fun onSuccess(credentials: Credentials) {
-                // Use credentials
-                Log.d(TAG, "")
-                greeting.text = (getString(R.string.home_welcome, credentials.idToken))
-
+                val jwt = JWT(credentials.idToken)
+                greeting.text = (getString(R.string.home_welcome, jwt.claims["name"]?.asString()))
+                idToken.text = credentials.idToken
             }
 
             override fun onFailure(error: CredentialsManagerException) {
@@ -57,9 +58,6 @@ class HomeActivity : ComponentActivity() {
                 Log.d(TAG, "")
             }
         })
-
-
-        greeting.text = (getString(R.string.home_welcome, "Carla!"))
 
         val logoutBtn = findViewById<Button>(R.id.home_logout_btn)
         logoutBtn.setOnClickListener {
@@ -69,18 +67,7 @@ class HomeActivity : ComponentActivity() {
     }
 
     private fun logout(){
-        WebAuthProvider.logout(auth0)
-            .withTrustedWebActivity()
-            .withScheme(getString(R.string.auth0_scheme))
-            .start(this, object: Callback<Void?, AuthenticationException> {
-                override fun onFailure(error: AuthenticationException) {
-                    Log.d(TAG, "Couldn't logout " + error.message)
-                }
-
-                override fun onSuccess(result: Void?) {
-                    credentialsManager.clearCredentials()
-                    finish()
-                }
-            })
+        credentialsManager.clearCredentials()
+        finish()
     }
 }
